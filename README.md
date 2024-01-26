@@ -71,3 +71,9 @@ yarn add @openzeppelin/contracts
 
 
 yarn add --dev hardhat-deploy
+
+
+# deploy
+```sh
+yarn deploy:sepolia
+```

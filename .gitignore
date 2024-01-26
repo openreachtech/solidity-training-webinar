@@ -141,3 +141,6 @@ typechain-types
 # solidity-coverage files
 /coverage
 /coverage.json
+
+# Mac
+.DS_Store
