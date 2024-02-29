@@ -63,17 +63,39 @@ yesを選択します。
 ? Do you want to install this sample project's dependencies with yarn (@nomicfoundation/hardhat-network-helpers @nomicfoundation/hardhat-verify chai hardhat-gas-reporter solidity-coverage @types/chai @types/mocha @types/node ts-node typescript @nomicfoundation/hardhat-toolbox @nomicfoundation/hardhat-chai-matchers @nomicfoundation/hardhat-ethers ethers @typechain/hardhat typechain @typechain/ethers-v6)? (Y/n) › y
 ```
 
-
 Dependenciesとして、Libraryを追加する
 ```sh
 yarn add @openzeppelin/contracts
+yarn add --dev hardhat-deploy
 ```
 
-
-yarn add --dev hardhat-deploy
-
-
-# deploy
+## コントラクトのDeploy
+Ethereumのテストネット（sepolia）へDeployします。
+まずは、秘密鍵と[EtherscanのAPI Key](https://docs.etherscan.io/getting-started/viewing-api-usage-statistics)を`.env`ファイルに記載します。
+.envファイルは.env.sampleをコピーして作ります。
+```sh
+cp .env.sample .env
+```
+そして、デプロイコマンドを実行します。
 ```sh
 yarn deploy:sepolia
+```
+デプロイが正常に終了すると、デプロイされたアドレスが表示されます。
+
+次に、EtherscanでコントラクトをVerifyします。この作業にはEtherscanのAPIキーが必要です。
+この作業は任意ですが、行うことでコントラクトと簡単に通信するためのUIを得ることができるため、推奨されます。
+```sh
+# ERC20CappedのVerify
+npx hardhat verify --network sepolia "0x..{Address of ERC20Capped}" "Capped ERC20" "CERC2" "1000"
+
+# Output例
+# Successfully verified contract ERC20Capped on the block explorer.
+# https://sepolia.etherscan.io/address/0x66d21ec29f2B8e72626FACf3EBbFFc2458e6B221#code
+
+# Simple NFTのVerify
+npx hardhat verify --network sepolia "0x..{Address of SimpleNFT}" "Simple NFT" "SNFT"
+
+# Output例
+# Successfully verified contract SimpleNFT on the block explorer.
+# https://sepolia.etherscan.io/address/0x0a5Ab3A96F07909F4025b29C4466c4Ef0D82048d#code
 ```
