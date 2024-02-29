@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT発行と一覧表示</title>
+    <!-- Bootstrap CSSの読み込み -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="./dist/bundle.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <button id="connectButton" class="btn btn-primary mb-3">Connect to Metamask</button>
+        <p id="accountAddress" class="mb-3">Not connected</p>
+
+        <!-- NFTの基本情報カード -->
+        <div class="card mb-4">
+            <div class="card-header">
+                NFTの基本情報
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> <span id="tokenName"></span></p>
+                <p><strong>Symbol:</strong> <span id="tokenSymbol"></span></p>
+                <p><strong>Total Supply:</strong> <span id="tokenSupply"></span></p>
+            </div>
+        </div>
+
+        <!-- NFTの発行カード -->
+        <div class="card mb-4">
+            <div class="card-header">
+                NFTの発行
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="toAddress">Toアドレス</label>
+                    <input type="text" class="form-control" id="toAddress" required>
+                </div>
+                <div class="form-group">
+                    <label for="tokenId">Token ID</label>
+                    <input type="number" class="form-control" id="tokenId" required>
+                </div>
+                <div class="form-group">
+                    <label for="tokenUri">tokenURI</label>
+                    <input type="text" class="form-control" id="tokenUri" required>
+                </div>
+                <button id="mintButton" class="btn btn-primary">発行</button>
+            </div>
+        </div>
+
+        <!-- 発行したNFTを一覧表示カード -->
+        <div class="card">
+            <div class="card-header">
+                発行したNFTの一覧
+            </div>
+            <div class="card-body">
+                <div id="nftList" class="list-group">
+                    <!-- ここにNFTが追加されます -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Optional JavaScript and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // *変更が必要な箇所*
+        // DeployされたNFTのアドレスを指定
+        const NFT_ADDRESS = "0x0a5Ab3A96F07909F4025b29C4466c4Ef0D82048d"
+        let sdk;
+        let userAccount;
+
+        async function connectMetamask() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = accounts[0];
+                    sdk = new Sdk(window.ethereum, NFT_ADDRESS)
+                    await sdk.connectMetamask();
+
+                    document.getElementById('accountAddress').innerText = `Connected: ${userAccount}`;
+                    getTokenData();
+                } catch (error) {
+                    console.error("Error connecting to Metamask", error);
+                }
+            } else {
+                alert('Metamask is not installed. Please install it to use this feature.');
+            }
+        }
+
+        document.getElementById('connectButton').addEventListener('click', connectMetamask);
+
+        async function getTokenData() {
+            const { name, symbol, totalSupply } = await sdk.getTokenData();
+
+            document.getElementById('tokenName').innerText = name;
+            document.getElementById('tokenSymbol').innerText = symbol;
+            document.getElementById('tokenSupply').innerText = totalSupply;
+        }
+
+        // トークンをMintする関数
+        async function mintTokens() {
+            const to = document.getElementById('toAddress').value;
+            const tokenId = document.getElementById('tokenId').value;
+            const tokenUri = document.getElementById('tokenUri').value;
+            const receipt = await sdk.mintNFT(to, tokenId, tokenUri);
+            if (receipt.status !== 1) {
+                console.error(receipt)
+                alert('Transaction failed');
+                return;
+            }
+            console.log(`Transaction hash: ${receipt.hash}`);
+
+            // トークンの総量の更新
+            getTokenData();
+
+            // トークンのURIを取得してNFT一覧に追加
+            const tokenFullURI = await sdk.getTokenURI(tokenId);
+            addNftToList(tokenId, to, tokenFullURI);
+        }
+
+        document.getElementById('mintButton').addEventListener('click', mintTokens);
+
+        // NFT一覧に項目を追加する関数
+        function addNftToList(tokenId, address, tokenUri) {
+            const nftList = document.getElementById('nftList'); // NFT一覧の要素を取得
+
+            // 新しいNFT項目のHTMLを作成
+            const newItemHtml = `
+                <div class="list-group-item">
+                    <div class="row">
+                        <div class="col-md-4"><strong>Token ID:</strong> ${tokenId}</div>
+                        <div class="col-md-4"><strong>所有者のアドレス:</strong> ${address}</div>
+                        <div class="col-md-4"><strong>Token URL:</strong> ${tokenUri}</div>
+                    </div>
+                </div>
+            `;
+
+            // NFT一覧に新しい項目を追加
+            nftList.insertAdjacentHTML('beforeend', newItemHtml);
+        }
+    </script>
+</body>
+</html>
