@@ -6,9 +6,9 @@
     "test": "hardhat test",
     "chain": "hardhat node --no-deploy",
     "deploy": "hardhat deploy --network hardhat",
-    "deploy:sepolia": "npx hardhat deploy --network sepolia",
-    "deploy:sepolia:erc20": "npx hardhat deploy --network sepolia --tags erc20",
-    "deploy:sepolia:nft": "npx hardhat deploy --network sepolia --tags nft",
+    "deploy:sepolia": "hardhat deploy --network sepolia",
+    "deploy:sepolia:erc20": "hardhat deploy --network sepolia --tags erc20",
+    "deploy:sepolia:nft": "hardhat deploy --network sepolia --tags nft",
     "fmt": "prettier --write --list-different '{contracts,test,tasks}/**/*.{sol,ts}'",
     "lint": "solhint 'contracts/**/*.sol'",
     "slither": "slither . --filter-paths node_modules,test"
